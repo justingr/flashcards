@@ -25,9 +25,6 @@ An engaging, easy-to-use flashcard app for children to practice and improve thei
 
 ```source venv/bin/activate```
 
-markdown
-
-
 3. Install the required Python packages:
 
 ```pip install -r requirements.txt```
