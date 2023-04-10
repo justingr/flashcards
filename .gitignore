@@ -1,0 +1,20 @@
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+*.so
+*.dylib
+*.log
+*.swp
+*.gztar
+
+# Virtual environment
+bin/
+include/
+lib/
+lib64/
+pyvenv.cfg
+*.egg-info/
+
+# macOS
+.DS_Store
