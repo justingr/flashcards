@@ -22,6 +22,7 @@ An engaging, easy-to-use flashcard app for children to practice and improve thei
 2. Create a virtual environment and activate it:
 
 python3 -m venv venv
+
 source venv/bin/activate
 
 markdown
