@@ -1,5 +1,5 @@
-import random
 import glob
+import random
 import tkinter as tk
 from tkinter import messagebox
 import os
@@ -38,15 +38,26 @@ class FlashcardApp(tk.Tk):
         self.current_operation = None
         self.title("Flashcard App")
         self.geometry("800x800")
-        #self.resizable(False, False)  # Disable window resizing
 
-        background_image = Image.open('assets/background.png')
+        background_image = Image.open(self.get_random_background_image())
         self.background_image = ImageTk.PhotoImage(background_image)
+        self.background_label = tk.Label(self, image=self.background_image)
+        self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
+
+        self.bg_color = self.get_random_pixel_color(background_image)
 
         self.operation = tk.StringVar()
         self.operation.set("multiplication")
         self.create_widgets()
         self.center_window()
+
+    def get_random_pixel_color(self, image):
+        width, height = image.size
+        random_x = random.randint(0, width - 1)
+        random_y = random.randint(0, height - 1)
+        pixel_color = image.getpixel((random_x, random_y))
+        return "#{:02x}{:02x}{:02x}".format(pixel_color[0], pixel_color[1], pixel_color[2])
+
 
     def center_window(self):
         screen_width = self.winfo_screenwidth()
@@ -57,6 +68,9 @@ class FlashcardApp(tk.Tk):
 
         self.geometry(f"800x800+{x}+{y}")
     
+    def get_random_background_image(self):
+        background_images = glob.glob("assets/*.png")
+        return random.choice(background_images)
 
     def play_correct_sound(self):
         correct_sound_file = "assets/correct_sound.wav"
@@ -75,28 +89,25 @@ class FlashcardApp(tk.Tk):
             print("Sound file not found")
 
     def create_widgets(self):
-        bg_color = "#a7baa6"
-        self.operation_buttons_frame = tk.Frame(self, bg=bg_color)
+        self.operation_buttons_frame = tk.Frame(self, bg=self.bg_color)
         self.operation_buttons_frame.pack(pady=20)
 
         for operation in ["addition", "subtraction", "multiplication", "division"]:
             operation_button = tk.Button(self.operation_buttons_frame, text=operation.capitalize(),
-                                        command=lambda op=operation: self.start_flashcard(operation=op),
-                                        bg=bg_color, fg="black", highlightbackground=bg_color,
-                                        bd=0, relief="ridge")
+                                         command=lambda op=operation: self.start_flashcard(operation=op),
+                                         bg=self.bg_color, fg="black", highlightbackground=self.bg_color,
+                                         bd=0, relief="ridge")
             operation_button.pack(side=tk.LEFT, padx=10)
 
-        self.question_label = tk.Label(self, text="", font=("Helvetica", 100, "bold"), bg=bg_color)
+        self.question_label = tk.Label(self, text="", font=("Helvetica", 100, "bold"), bg=self.bg_color)
         self.question_label.pack(pady=20)
-        self.answer_entry = tk.Entry(self, font=("Helvetica", 100, "bold"), width=3, bg=bg_color)
+        self.answer_entry = tk.Entry(self, font=("Helvetica", 100, "bold"), width=3, bg=self.bg_color)
         self.answer_entry.pack()
         self.submit_button = tk.Button(self, text="Submit", command=self.check_answer, state="disabled")
         self.submit_button.pack()
 
         # Bind the Return key to the check_answer function
         self.bind("<Return>", lambda event: self.check_answer())
-        background_label = tk.Label(self, image=self.background_image)
-        background_label.place(x=0, y=0, relwidth=1, relheight=1)
 
         # Bring the other widgets to the front
         self.operation_buttons_frame.lift()
@@ -105,11 +116,15 @@ class FlashcardApp(tk.Tk):
         self.submit_button.lift()
 
     def start_flashcard(self, operation):
-        self.current_operation = operation
-        self.question, self.answer = generate_flashcard(self.current_operation)
+        self.operation.set(operation)
+        self.question, self.answer = generate_flashcard(self.operation.get())
         self.question_label.config(text=self.question)
         self.answer_entry.delete(0, tk.END)
         self.submit_button.config(state="normal")
+
+        background_image = Image.open(self.get_random_background_image())
+        self.background_photo = ImageTk.PhotoImage(background_image)
+        self.background_label.config(image=self.background_photo)
 
 
     def check_answer(self):
