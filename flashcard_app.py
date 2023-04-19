@@ -2,6 +2,7 @@ import glob
 import random
 import tkinter as tk
 from tkinter import messagebox
+from tkinter import ttk
 import os
 import simpleaudio as sa
 from PIL import Image, ImageTk
@@ -47,6 +48,8 @@ def update_button_colors(buttons, bg_color, text_color):
 class FlashcardApp(tk.Tk):
     def __init__(self):
         super().__init__()
+        self.style = ttk.Style(self)
+        self.style.theme_use('clam')  # Use the 'clam' theme    
         self.current_operation = None
         self.title("Flashcard App")
         self.geometry("800x800")
@@ -102,69 +105,52 @@ class FlashcardApp(tk.Tk):
             print("Sound file not found")
 
     def create_widgets(self):
-        # Get the random pixel color from the background image
-        button_bg_color = self.get_random_pixel_color(self.background_image)
-        button_text_color = contrasting_text_color(button_bg_color)
-
-        self.operation_buttons_frame = tk.Frame(self, bg=button_bg_color)
+        self.operation_buttons_frame = tk.Frame(self)
         self.operation_buttons_frame.pack(pady=20)
 
         for operation in ["addition", "subtraction", "multiplication", "division"]:
-            operation_button = tk.Button(self.operation_buttons_frame, text=operation.capitalize(),
-                                        command=lambda op=operation: self.start_flashcard(operation=op),
-                                        bg=button_bg_color, fg=button_text_color, highlightbackground=button_bg_color,
-                                        bd=0, relief="ridge")
+            operation_button = ttk.Button(self.operation_buttons_frame, text=operation.capitalize(),
+                                        command=lambda op=operation: self.start_flashcard(operation=op))
             operation_button.pack(side=tk.LEFT, padx=10)
 
-        self.question_label = tk.Label(self, text="", font=("Helvetica", 100, "bold"), bg=button_bg_color)
+        self.question_label = tk.Label(self, text="", font=("Helvetica", 100, "bold"))
         self.question_label.pack(pady=20)
-        self.answer_entry = tk.Entry(self, font=("Helvetica", 100, "bold"), width=3, bg=button_bg_color)
+        self.answer_entry = tk.Entry(self, font=("Helvetica", 100, "bold"), width=3)
         self.answer_entry.pack()
-        self.submit_button = tk.Button(self, text="Submit", command=self.check_answer, state="disabled", bg=button_bg_color, fg=button_text_color)
+        self.submit_button = ttk.Button(self, text="Submit", command=self.check_answer, state="disabled")
         self.submit_button.pack()
 
         # Bind the Return key to the check_answer function
         self.bind("<Return>", lambda event: self.check_answer())
 
-        # Bring the other widgets to the front
-        self.operation_buttons_frame.lift()
-        self.question_label.lift()
-        self.answer_entry.lift()
-        self.submit_button.lift()
+        button_bg_color = self.get_random_pixel_color(self.background_image)
+        button_text_color = contrasting_text_color(button_bg_color)
 
-        # Set the background label image using the background_photo
-        self.background_label.config(image=self.background_photo)
-        self.background_label.place(x=0, y=0, relwidth=1, relheight=1)
+        self.operation_buttons_frame.config(bg=self.bg_color)
+        self.question_label.config(bg=self.bg_color)
+        self.answer_entry.config(bg=self.bg_color)
 
-        # Update button colors
-        update_button_colors(self.operation_buttons_frame.winfo_children(), button_bg_color, button_text_color)
+        for button in self.operation_buttons_frame.winfo_children():
+            button.config(style='TButton')
+
+        ttk.Style().configure('TButton', background=button_bg_color, foreground=button_text_color)
+
+
+
 
 
 
 
     def start_flashcard(self, operation):
+        self.current_operation = operation
         self.operation.set(operation)
         self.question, self.answer = generate_flashcard(self.operation.get())
         self.question_label.config(text=self.question)
         self.answer_entry.delete(0, tk.END)
         self.submit_button.config(state="normal")
 
-        self.background_image = Image.open(self.get_random_background_image())
-        self.background_photo = ImageTk.PhotoImage(self.background_image)
-        self.background_label.config(image=self.background_photo)
-        update_button_colors(self.operation_buttons_frame.winfo_children(), button_bg_color, button_text_color)
 
-        # Update button colors based on the new background image
-        button_bg_color = '#%02x%02x%02x' % self.get_random_pixel_color(self.background_image)
-        button_text_color = '#%02x%02x%02x' % self.get_random_pixel_color(self.background_image)
-        
-        self.operation_buttons_frame.config(bg=button_bg_color)
-        self.question_label.config(bg=button_bg_color)
-        self.answer_entry.config(bg=button_bg_color)
-        self.submit_button.config(bg=button_bg_color, fg=button_text_color)
 
-        for button in self.operation_buttons_frame.winfo_children():
-            button.config(bg=button_bg_color, fg=button_text_color)
 
 
 
